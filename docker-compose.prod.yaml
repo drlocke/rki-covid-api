@@ -38,3 +38,5 @@ services:
       - PGID=1000
       - PUID=0
       - PGID=0
+    networks:
+      - redis-net
