@@ -12,7 +12,7 @@ services:
   rki-api:
     image: marlon360/rki-covid-server:v2
     ports:
-      - "80:3000"
+      - "8080:3000"
     depends_on:
       - redis
       - rki-api-letsencrypt
