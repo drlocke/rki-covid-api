@@ -1,6 +1,6 @@
 version: "3.8"
 networks:
-  redis-net:
+  corona-net:
 services:
   redis:
     image: redis
