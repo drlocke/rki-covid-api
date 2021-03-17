@@ -21,7 +21,7 @@ services:
     networks:
       - redis-net
   rki-api-letsencrypt:
-    image: linuxserver/docker-swag
+    image: ghcr.io/linuxserver/swag
     container_name: rki-api-letsencrypt
     ports:
       - 80:80
