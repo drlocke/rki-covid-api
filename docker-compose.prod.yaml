@@ -21,8 +21,8 @@ services:
     networks:
       - corona-net
     environment:
-      - VIRTUAL_HOST=corona-ka.de 
-      - LETSENCRYPT_HOST=corona-ka.de 
+      - VIRTUAL_HOST=api.corona-ka.de 
+      - LETSENCRYPT_HOST=api.corona-ka.de 
       - LETSENCRYPT_EMAIL=hi.ho.locke@gmail.com
       - SSL_POLICY=AWS-TLS-1-2-2017-01
       - NODE_ENV=production
