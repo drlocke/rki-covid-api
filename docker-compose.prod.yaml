@@ -8,18 +8,18 @@ services:
     expose:
       - 6379
     networks:
-      - redis-net
+      - corona-net
       
   rki-api:
     image: marlon360/rki-covid-server:v2
     ports:
-      - "8080:3000"
+      - "3000:3000"
     depends_on:
       - redis
     environment:
       - REDIS_URL=redis
     networks:
-      - redis-net
+      - corona-net
     environment:
       - VIRTUAL_HOST=corona-ka.de 
       - LETSENCRYPT_HOST=corona-ka.de 
@@ -41,7 +41,7 @@ services:
       - html:/usr/share/nginx/html
       - /var/run/docker.sock:/tmp/docker.sock:ro
     networks:
-      - proxy-tier
+      - corona-net
 
   letsencrypt-companion:
     image: jrcs/letsencrypt-nginx-proxy-companion
@@ -52,7 +52,7 @@ services:
       - html:/usr/share/nginx/html
       - /var/run/docker.sock:/var/run/docker.sock:ro
     networks:
-      - proxy-tier
+      - corona-net
     depends_on:
       - proxy
 volumes:
@@ -61,5 +61,4 @@ volumes:
   html:
 
 networks:
-  proxy-tier:
-  redis-net:
+  corona-net:
