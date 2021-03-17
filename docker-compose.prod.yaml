@@ -15,7 +15,24 @@ services:
       - "8080:3000"
     depends_on:
       - redis
+      - rki-api-letsencrypt
     environment:
       - REDIS_URL=redis
     networks:
       - redis-net
+  rki-api-letsencrypt:
+    image: linuxserver/letsencrypt
+    container_name: rki-api-letsencrypt
+    ports:
+      - 8080:8080
+      - 443:443
+    volumes:
+      - ./config/letsencrypt:/config
+    environment:
+      - EMAIL=hi.ho.locke@gmail.com
+      - URL=corona-ka.de
+      - SUBDOMAINS=www,api
+      - VALIDATION=http
+      - TZ=Europe/Stockholm
+      - PUID=0
+      - PGID=0
