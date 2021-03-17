@@ -7,58 +7,43 @@ services:
     container_name: cache
     expose:
       - 6379
+    restart: always
     networks:
       - corona-net
-      
   rki-api:
     image: marlon360/rki-covid-server:v2
     ports:
-      - "3000:3000"
+      - "8080:3000"
     depends_on:
       - redis
+    restart: always
     environment:
       - REDIS_URL=redis
     networks:
       - corona-net
-    environment:
-      - VIRTUAL_HOST=api.corona-ka.de 
-      - LETSENCRYPT_HOST=api.corona-ka.de 
-      - LETSENCRYPT_EMAIL=hi.ho.locke@gmail.com
-      - SSL_POLICY=AWS-TLS-1-2-2017-01
-      - NODE_ENV=production
-      
-  proxy:
-    build: ./proxy
-    restart: always
+  rki-api-letsencrypt:
+    image: ghcr.io/linuxserver/swag
+    container_name: rki-api-letsencrypt
     ports:
-      - 80:80
-      - 443:443
-    labels:
-      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
-    volumes:
-      - certs:/etc/nginx/certs:ro
-      - vhost.d:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-    networks:
-      - corona-net
-
-  letsencrypt-companion:
-    image: jrcs/letsencrypt-nginx-proxy-companion
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - rki-api
     restart: always
     volumes:
-      - certs:/etc/nginx/certs
-      - vhost.d:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
-      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # the actual configuration file to use for the reverse proxy (located in current repo directory)
+      - ./nginxConfig/nginx.conf:/config/nginx/site-confs/default
+      # overrides for ssl conf from base image
+      - ./nginxConfig/ssl.conf:/config/nginx/ssl.conf
+    environment:
+      - EMAIL=hi.ho.locke@gmail.com
+      - URL=api.corona-ka.de
+      - SUBDOMAINS=www
+      - TZ=Europe/London
+      - PUID=1000
+      - PGID=1000
+      - VALIDATION=dns # using dns validation
+      - DNSPLUGIN=dnsimple # via dnsimple, note there is additional configuration require separate from this file
+      # - STAGING=true # this should be uncommented when testing for initial success, to avoid some rate limiting
     networks:
       - corona-net
-    depends_on:
-      - proxy
-volumes:
-  certs:
-  vhost.d:
-  html:
-
-networks:
-  corona-net:
