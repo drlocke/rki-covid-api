@@ -21,7 +21,7 @@ services:
     networks:
       - redis-net
   rki-api-letsencrypt:
-    image: linuxserver/letsencrypt
+    image: linuxserver/docker-swag
     container_name: rki-api-letsencrypt
     ports:
       - 80:80
@@ -31,8 +31,10 @@ services:
     environment:
       - EMAIL=hi.ho.locke@gmail.com
       - URL=corona-ka.de
-      - SUBDOMAINS=www,api
+      - SUBDOMAINS=www,
       - VALIDATION=http
-      - TZ=Europe/Stockholm
+      - TZ=Europe/London
+      - PUID=1000
+      - PGID=1000
       - PUID=0
       - PGID=0
