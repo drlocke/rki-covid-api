@@ -9,34 +9,57 @@ services:
       - 6379
     networks:
       - redis-net
+      
   rki-api:
     image: marlon360/rki-covid-server:v2
     ports:
       - "8080:3000"
     depends_on:
       - redis
-      - rki-api-letsencrypt
     environment:
       - REDIS_URL=redis
     networks:
       - redis-net
-  rki-api-letsencrypt:
-    image: ghcr.io/linuxserver/swag
-    container_name: rki-api-letsencrypt
+    environment:
+      - VIRTUAL_HOST=corona-ka.de 
+      - LETSENCRYPT_HOST=corona-ka.de 
+      - LETSENCRYPT_EMAIL=hi.ho.locke@gmail.com
+      - SSL_POLICY=AWS-TLS-1-2-2017-01
+      - NODE_ENV=production
+      
+  proxy:
+    build: ./proxy
+    restart: always
     ports:
       - 80:80
       - 443:443
+    labels:
+      com.github.jrcs.letsencrypt_nginx_proxy_companion.nginx_proxy: "true"
     volumes:
-      - ./config/letsencrypt:/config
-    environment:
-      - EMAIL=hi.ho.locke@gmail.com
-      - URL=corona-ka.de
-      - SUBDOMAINS=www,
-      - VALIDATION=http
-      - TZ=Europe/London
-      - PUID=1000
-      - PGID=1000
-      - PUID=0
-      - PGID=0
+      - certs:/etc/nginx/certs:ro
+      - vhost.d:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
     networks:
-      - redis-net
+      - proxy-tier
+
+  letsencrypt-companion:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    restart: always
+    volumes:
+      - certs:/etc/nginx/certs
+      - vhost.d:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - proxy-tier
+    depends_on:
+      - proxy
+volumes:
+  certs:
+  vhost.d:
+  html:
+
+networks:
+  proxy-tier:
+  redis-net:
